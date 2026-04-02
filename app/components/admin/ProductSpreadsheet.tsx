@@ -905,6 +905,292 @@ function RowStatus({ status }: { status: "idle" | "saving" | "saved" | "error" }
   );
 }
 
+// CSV Upload Modal
+function CSVUploadModal({
+  isOpen,
+  onClose,
+  onUpload,
+  designers,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onUpload: (products: Partial<Product>[]) => void;
+  designers: Designer[];
+}) {
+  const [csvData, setCsvData] = useState<string>("");
+  const [parsedProducts, setParsedProducts] = useState<Partial<Product>[]>([]);
+  const [error, setError] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const parseCSV = (text: string) => {
+    setError("");
+    const lines = text.trim().split("\n");
+    if (lines.length < 2) {
+      setError("CSV must have a header row and at least one data row");
+      return;
+    }
+
+    const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/['"]/g, ""));
+    const products: Partial<Product>[] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      // Handle quoted values with commas
+      const values: string[] = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (const char of lines[i]) {
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === "," && !inQuotes) {
+          values.push(current.trim().replace(/^["']|["']$/g, ""));
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      values.push(current.trim().replace(/^["']|["']$/g, ""));
+
+      if (values.length !== headers.length) continue;
+
+      const product: Partial<Product> = {};
+
+      headers.forEach((header, index) => {
+        const value = values[index];
+        if (!value) return;
+
+        switch (header) {
+          case "name":
+          case "product name":
+          case "title":
+            product.name = value;
+            break;
+          case "designer":
+          case "designer name":
+          case "brand":
+            // Try to find designer by name
+            const designer = designers.find(
+              (d) => d.name.toLowerCase() === value.toLowerCase()
+            );
+            if (designer) {
+              product.designer_id = designer.id;
+            }
+            break;
+          case "price":
+          case "price_per_rental":
+          case "rental price":
+            product.price_per_rental = parseFloat(value) || 0;
+            break;
+          case "description":
+          case "notes":
+            product.description = value;
+            break;
+          case "size":
+            product.size = value;
+            break;
+          case "color":
+            product.color = value.toLowerCase();
+            break;
+          case "category":
+            product.category = value.toLowerCase();
+            break;
+          case "condition":
+            product.condition = value;
+            break;
+          case "era":
+            product.era = value;
+            break;
+          case "material":
+            product.material = value.toLowerCase();
+            break;
+          case "style":
+            if (["masculine", "feminine", "unisex"].includes(value.toLowerCase())) {
+              product.style = value.toLowerCase() as ProductStyle;
+            }
+            break;
+          case "tier":
+          case "tier_required":
+            product.tier_required = parseInt(value) || 1;
+            break;
+        }
+      });
+
+      if (product.name) {
+        products.push({
+          ...product,
+          price_per_rental: product.price_per_rental || 0,
+          style: product.style || "unisex",
+          tier_required: product.tier_required || 1,
+          archive: false,
+        });
+      }
+    }
+
+    if (products.length === 0) {
+      setError("No valid products found. Make sure CSV has a 'name' column.");
+      return;
+    }
+
+    setParsedProducts(products);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      setCsvData(text);
+      parseCSV(text);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleTextChange = (text: string) => {
+    setCsvData(text);
+    if (text.trim()) {
+      parseCSV(text);
+    } else {
+      setParsedProducts([]);
+    }
+  };
+
+  const handleUpload = () => {
+    if (parsedProducts.length > 0) {
+      onUpload(parsedProducts);
+      setCsvData("");
+      setParsedProducts([]);
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div
+        className="bg-[var(--background)] border border-[var(--gold)]/30 p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm tracking-[0.15em] uppercase text-[var(--gold)]">
+            Import Products from CSV
+          </h3>
+          <button onClick={onClose} className="p-1 hover:bg-[var(--gold)]/10 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-xs text-[var(--foreground)]/60 mb-2">
+            Supported columns: name, designer, price, description, size, color, category, condition, era, material, style, tier
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 text-xs border border-[var(--gold)]/30 text-[var(--foreground)] hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors"
+          >
+            Choose CSV File
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-xs text-[var(--foreground)]/60 mb-2">Or paste CSV data:</label>
+          <textarea
+            value={csvData}
+            onChange={(e) => handleTextChange(e.target.value)}
+            rows={6}
+            className="w-full px-3 py-2 text-xs font-mono bg-[var(--background-warm)] border border-[var(--gold)]/20 focus:outline-none focus:border-[var(--gold)] transition-colors"
+            placeholder="name,designer,price,category,size,color&#10;Vintage Silk Dress,Versace,150,dresses,M,black"
+          />
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-[var(--wine)]/10 border border-[var(--wine)]/30 text-sm text-[var(--wine)]">
+            {error}
+          </div>
+        )}
+
+        {parsedProducts.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-[var(--gold)] mb-2">
+              Preview: {parsedProducts.length} products to import
+            </p>
+            <div className="max-h-40 overflow-y-auto border border-[var(--gold)]/10">
+              <table className="w-full text-xs">
+                <thead className="bg-[var(--background-warm)]">
+                  <tr>
+                    <th className="px-2 py-1 text-left">Name</th>
+                    <th className="px-2 py-1 text-left">Designer</th>
+                    <th className="px-2 py-1 text-left">Price</th>
+                    <th className="px-2 py-1 text-left">Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {parsedProducts.slice(0, 10).map((p, i) => (
+                    <tr key={i} className="border-t border-[var(--gold)]/10">
+                      <td className="px-2 py-1">{p.name}</td>
+                      <td className="px-2 py-1 text-[var(--foreground)]/60">
+                        {designers.find((d) => d.id === p.designer_id)?.name || "-"}
+                      </td>
+                      <td className="px-2 py-1">${p.price_per_rental}</td>
+                      <td className="px-2 py-1">{p.category || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {parsedProducts.length > 10 && (
+                <p className="text-xs text-[var(--foreground)]/50 p-2">
+                  ...and {parsedProducts.length - 10} more
+                </p>
+              )}
+            </div>
+            <p className="text-[10px] text-[var(--foreground)]/40 mt-2">
+              Products will be created as drafts (no images). Add images to publish them.
+            </p>
+          </div>
+        )}
+
+        <div className="flex gap-2 justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-xs border border-[var(--gold)]/30 text-[var(--foreground)] hover:bg-[var(--background-warm)] transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpload}
+            disabled={parsedProducts.length === 0}
+            className="px-4 py-2 text-xs bg-[var(--wine)] text-white hover:bg-[var(--espresso)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Import {parsedProducts.length} Products
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Draft status badge
+function DraftBadge({ hasImages }: { hasImages: boolean }) {
+  if (hasImages) return null;
+
+  return (
+    <span className="px-1.5 py-0.5 text-[8px] uppercase tracking-wider bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
+      Draft
+    </span>
+  );
+}
+
 // Main spreadsheet component
 export default function ProductSpreadsheet({
   initialProducts,
@@ -914,6 +1200,7 @@ export default function ProductSpreadsheet({
   const [designers, setDesigners] = useState<Designer[]>(initialDesigners);
   const [rowStatuses, setRowStatuses] = useState<Record<string, "idle" | "saving" | "saved" | "error">>({});
   const [isCreating, setIsCreating] = useState(false);
+  const [showCSVModal, setShowCSVModal] = useState(false);
   const [newProductData, setNewProductData] = useState<Partial<Product> & { mediaItems: MediaItem[] }>({
     name: "",
     designer_id: null,
@@ -1148,6 +1435,53 @@ export default function ProductSpreadsheet({
     }
   };
 
+  // Bulk create products from CSV
+  const bulkCreateProducts = async (productsToCreate: Partial<Product>[]) => {
+    setIsCreating(true);
+
+    const created: Product[] = [];
+
+    for (const productData of productsToCreate) {
+      try {
+        const res = await fetch("/api/admin/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: productData.name,
+            designer_id: productData.designer_id || null,
+            description: productData.description || null,
+            price_per_rental: productData.price_per_rental || 0,
+            size: productData.size || null,
+            color: productData.color || null,
+            category: productData.category || null,
+            condition: productData.condition || null,
+            era: productData.era || null,
+            material: productData.material || null,
+            style: productData.style || "unisex",
+            archive: false,
+            tier_required: productData.tier_required || 1,
+            quantity: 1,
+            mediaUrls: [],
+          }),
+        });
+
+        if (res.ok) {
+          const product = await res.json();
+          created.push(product);
+        }
+      } catch (err) {
+        console.error("Failed to create product:", productData.name, err);
+      }
+    }
+
+    // Add all created products to the list
+    if (created.length > 0) {
+      setProducts((prev) => [...created, ...prev]);
+    }
+
+    setIsCreating(false);
+  };
+
   const deleteProduct = async (productId: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
@@ -1164,17 +1498,44 @@ export default function ProductSpreadsheet({
     }
   };
 
+  const draftCount = products.filter((p) => !p.media || p.media.length === 0).length;
+  const publishedCount = products.length - draftCount;
+
   return (
     <div className="bg-[var(--background)] border border-[var(--gold)]/10 overflow-hidden">
+      {/* CSV Upload Modal */}
+      <CSVUploadModal
+        isOpen={showCSVModal}
+        onClose={() => setShowCSVModal(false)}
+        onUpload={bulkCreateProducts}
+        designers={designers}
+      />
+
       {/* Header */}
       <div className="px-4 py-3 border-b border-[var(--gold)]/10 bg-[var(--background-warm)]">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs tracking-[0.15em] uppercase text-[var(--gold)]">
-            Product Spreadsheet
-          </h2>
-          <p className="text-xs text-[var(--foreground)]/50">
-            {products.length} products
-          </p>
+          <div className="flex items-center gap-4">
+            <h2 className="text-xs tracking-[0.15em] uppercase text-[var(--gold)]">
+              Product Spreadsheet
+            </h2>
+            <div className="flex items-center gap-2 text-[10px]">
+              <span className="text-[var(--foreground)]/50">{publishedCount} published</span>
+              {draftCount > 0 && (
+                <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
+                  {draftCount} drafts
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => setShowCSVModal(true)}
+            className="px-3 py-1.5 text-[10px] tracking-wider uppercase border border-[var(--gold)]/30 text-[var(--foreground)]/70 hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors flex items-center gap-2"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import CSV
+          </button>
         </div>
       </div>
 
@@ -1376,11 +1737,14 @@ export default function ProductSpreadsheet({
                     />
                   </td>
                   <td className="px-2 py-2">
-                    <EditableCell
-                      value={product.name}
-                      onChange={(v) => updateProduct(product.id, "name", v)}
-                      placeholder="Product name..."
-                    />
+                    <div className="flex items-center gap-2">
+                      <EditableCell
+                        value={product.name}
+                        onChange={(v) => updateProduct(product.id, "name", v)}
+                        placeholder="Product name..."
+                      />
+                      <DraftBadge hasImages={mediaItems.length > 0} />
+                    </div>
                   </td>
                   <td className="px-2 py-2">
                     <DesignerDropdown
