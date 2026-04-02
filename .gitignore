@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+vindtia-343c71d53b88.json
+supabase/.temp/

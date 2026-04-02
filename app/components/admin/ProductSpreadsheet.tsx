@@ -339,7 +339,14 @@ function ImageCell({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [localItems, setLocalItems] = useState<MediaItem[]>(mediaItems);
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingSync, setPendingSync] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const localItemsRef = useRef<MediaItem[]>(localItems);
+
+  // Keep ref in sync
+  useEffect(() => {
+    localItemsRef.current = localItems;
+  }, [localItems]);
 
   // Sync local items with props when props change (but not during upload)
   useEffect(() => {
@@ -348,10 +355,20 @@ function ImageCell({
     }
   }, [mediaItems, isUploading]);
 
-  // Notify parent when local items change
+  // Notify parent when pending sync is triggered
+  useEffect(() => {
+    if (pendingSync) {
+      onMediaChange(localItemsRef.current);
+      setPendingSync(false);
+    }
+  }, [pendingSync, onMediaChange]);
+
+  // Notify parent when local items change (for user actions)
   const updateItems = useCallback((newItems: MediaItem[]) => {
     setLocalItems(newItems);
-    onMediaChange(newItems);
+    localItemsRef.current = newItems;
+    // Defer the parent notification to avoid setState during render
+    setTimeout(() => onMediaChange(newItems), 0);
   }, [onMediaChange]);
 
   const uploadFile = async (file: File): Promise<string | null> => {
@@ -401,26 +418,28 @@ function ImageCell({
 
     const updatedItems = [...localItems, ...newItems];
     setLocalItems(updatedItems);
-    onMediaChange(updatedItems);
+    localItemsRef.current = updatedItems;
+    setTimeout(() => onMediaChange(updatedItems), 0);
 
     // Upload files sequentially
     for (const item of newItems) {
       if (item.file) {
         const uploadedUrl = await uploadFile(item.file);
 
-        setLocalItems(prev => {
-          const updated = [...prev];
-          const index = updated.findIndex((p) => p.url === item.url);
-          if (index !== -1) {
-            if (uploadedUrl) {
-              updated[index] = { ...updated[index], url: uploadedUrl, isUploading: false };
-            } else {
-              updated.splice(index, 1);
-            }
+        // Update state and notify parent
+        const currentItems = localItemsRef.current;
+        const updated = [...currentItems];
+        const index = updated.findIndex((p) => p.url === item.url);
+        if (index !== -1) {
+          if (uploadedUrl) {
+            updated[index] = { ...updated[index], url: uploadedUrl, isUploading: false };
+          } else {
+            updated.splice(index, 1);
           }
-          onMediaChange(updated);
-          return updated;
-        });
+        }
+        setLocalItems(updated);
+        localItemsRef.current = updated;
+        setTimeout(() => onMediaChange(updated), 0);
 
         URL.revokeObjectURL(item.url);
       }
