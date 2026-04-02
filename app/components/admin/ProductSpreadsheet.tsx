@@ -932,21 +932,46 @@ export default function ProductSpreadsheet({
 
       saveTimeouts.current[productId] = setTimeout(async () => {
         try {
+          // Get the current product to include all required fields
+          const currentProduct = products.find((p) => p.id === productId);
+          if (!currentProduct) {
+            throw new Error("Product not found");
+          }
+
           const mediaUrls = mediaItems
             ?.filter((m) => !m.isUploading)
             .sort((a, b) => a.sort_order - b.sort_order)
             .map((m) => m.url);
 
+          // Build full payload with current product data + updates
+          const payload = {
+            name: currentProduct.name,
+            designer_id: currentProduct.designer_id,
+            description: currentProduct.description,
+            price_per_rental: currentProduct.price_per_rental,
+            size: currentProduct.size,
+            color: currentProduct.color,
+            category: currentProduct.category,
+            condition: currentProduct.condition,
+            era: currentProduct.era,
+            material: currentProduct.material,
+            style: currentProduct.style,
+            archive: currentProduct.archive,
+            tier_required: currentProduct.tier_required,
+            ...updates,
+            ...(mediaUrls !== undefined ? { mediaUrls } : {}),
+          };
+
           const res = await fetch(`/api/admin/products/${productId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...updates,
-              ...(mediaUrls ? { mediaUrls } : {}),
-            }),
+            body: JSON.stringify(payload),
           });
 
-          if (!res.ok) throw new Error("Failed to save");
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error || "Failed to save");
+          }
 
           setRowStatuses((prev) => ({ ...prev, [productId]: "saved" }));
 
@@ -960,7 +985,7 @@ export default function ProductSpreadsheet({
         }
       }, 800);
     },
-    []
+    [products]
   );
 
   const updateProduct = useCallback(
