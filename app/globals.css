@@ -8,8 +8,8 @@
   --foreground: #2C2420;
 
   /* Luxury accent colors */
-  --wine: #722F37;
-  --wine-deep: #5C252D;
+  --wine: #62130e;
+  --wine-deep: #4a0f0b;
   --gold: #B8A06A;
   --gold-muted: #9A8654;
   --olive: #5C6B4A;
@@ -18,7 +18,7 @@
   --ivory: #FFFFF0;
 
   /* Typography */
-  --font-display: var(--font-playfair);
+  --font-display: var(--font-cormorant);
   --font-body: var(--font-cormorant);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -36,14 +36,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1A1714;
-    --background-warm: #1E1A16;
-    --background-deep: #141210;
-    --foreground: #F5F0E8;
-  }
-}
 
 body {
   background: var(--background);
@@ -120,17 +112,30 @@ body {
 
 /* Editorial display typography */
 .font-display {
-  font-family: var(--font-playfair), 'Didot', 'Bodoni MT', 'Times New Roman', serif;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', 'Garamond', Georgia, serif;
 }
 
 .font-editorial {
-  font-family: var(--font-cormorant), 'Garamond', Georgia, serif;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', 'Garamond', Georgia, serif;
+}
+
+.font-button {
+  font-family: var(--font-montserrat), 'Montserrat', -apple-system, sans-serif;
+  font-weight: 300;
 }
 
 /* Decorative gold rule */
 .rule-gold {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* Textured espresso background */
+.bg-textured {
+  background-image: url('/vindtia-textured-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Aged paper card */
@@ -239,4 +244,576 @@ html {
 :focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+/* ========================================
+   LUXURY BRAND PAGE ANIMATIONS
+   ======================================== */
+
+/* Elegant fade-in with upward drift */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered reveal animation */
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px) scale(0.98);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Shimmer effect for luxury accents */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Subtle float animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Gentle pulse glow */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
+  }
+}
+
+/* Horizontal line expand */
+@keyframes lineExpand {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+/* Rotate slowly */
+@keyframes rotateSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade in with scale */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide in from side */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Luxury entrance classes */
+.animate-fade-in-up {
+  animation: fadeInUp 1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.animate-reveal-up {
+  animation: revealUp 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* Stagger delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+
+/* Shimmer text effect */
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    currentColor 0%,
+    currentColor 40%,
+    rgba(255, 255, 255, 0.8) 50%,
+    currentColor 60%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Gold shimmer for Versace */
+.shimmer-gold {
+  background: linear-gradient(
+    90deg,
+    #C6A75E 0%,
+    #C6A75E 40%,
+    #E5C97A 50%,
+    #C6A75E 60%,
+    #C6A75E 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+/* Float animation class */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse glow effect */
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* Line expand animation */
+.animate-line-expand {
+  animation: lineExpand 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* Slow rotation */
+.animate-rotate-slow {
+  animation: rotateSlow 30s linear infinite;
+}
+
+/* Luxury product card effects */
+.product-card-luxury {
+  position: relative;
+  transition: all 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.product-card-luxury::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.product-card-luxury:hover::before {
+  opacity: 1;
+}
+
+/* Versace gold border reveal */
+.product-card-versace::before {
+  border: 1px solid rgba(198, 167, 94, 0.5);
+  box-shadow:
+    inset 0 0 20px rgba(198, 167, 94, 0.1),
+    0 0 30px rgba(198, 167, 94, 0.15);
+}
+
+/* Armani subtle lift */
+.product-card-armani {
+  transition: all 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.product-card-armani:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.4);
+}
+
+/* Valentino romantic glow */
+.product-card-valentino::before {
+  background: radial-gradient(ellipse at center, rgba(190, 10, 38, 0.08) 0%, transparent 70%);
+  border: 1px solid rgba(190, 10, 38, 0.2);
+}
+
+/* Prada architectural shadow */
+.product-card-prada:hover {
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 40px 80px rgba(0, 0, 0, 0.08);
+}
+
+/* Decorative corner ornament animation */
+@keyframes cornerGlow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.corner-ornament {
+  animation: cornerGlow 4s ease-in-out infinite;
+}
+
+/* Scroll indicator bounce */
+@keyframes scrollBounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 0.8;
+  }
+}
+
+.animate-scroll-bounce {
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+
+/* Elegant underline reveal */
+.underline-reveal {
+  position: relative;
+  display: inline-block;
+}
+
+.underline-reveal::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform: translateX(-50%);
+}
+
+.underline-reveal:hover::after {
+  width: 100%;
+}
+
+/* Image reveal effect */
+@keyframes imageReveal {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.image-reveal {
+  animation: imageReveal 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* Parallax-like depth on scroll */
+.parallax-subtle {
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+}
+
+/* Luxury section divider */
+.luxury-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0.3;
+}
+
+.luxury-divider::before,
+.luxury-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.luxury-divider::before {
+  left: calc(50% - 40px);
+}
+
+.luxury-divider::after {
+  right: calc(50% - 40px);
+}
+
+/* Decorative flourish */
+.flourish {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.flourish::before,
+.flourish::after {
+  content: '';
+  height: 1px;
+  width: 60px;
+  background: linear-gradient(90deg, transparent, currentColor);
+  opacity: 0.4;
+}
+
+.flourish::after {
+  background: linear-gradient(270deg, transparent, currentColor);
+}
+
+/* Backdrop blur with grain */
+.backdrop-luxury {
+  backdrop-filter: blur(20px) saturate(150%);
+}
+
+/* Refined hover glow */
+.hover-glow {
+  transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+/* Text mask gradient reveal */
+@keyframes textReveal {
+  from {
+    background-position: 100% center;
+  }
+  to {
+    background-position: 0% center;
+  }
+}
+
+/* Product image zoom container */
+.image-zoom-container {
+  overflow: hidden;
+}
+
+.image-zoom-container img {
+  transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.image-zoom-container:hover img {
+  transform: scale(1.08);
+}
+
+/* Staggered grid reveal */
+.grid-stagger > * {
+  opacity: 0;
+  animation: revealUp 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.grid-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+.grid-stagger > *:nth-child(2) { animation-delay: 0.2s; }
+.grid-stagger > *:nth-child(3) { animation-delay: 0.3s; }
+.grid-stagger > *:nth-child(4) { animation-delay: 0.4s; }
+.grid-stagger > *:nth-child(5) { animation-delay: 0.5s; }
+.grid-stagger > *:nth-child(6) { animation-delay: 0.6s; }
+.grid-stagger > *:nth-child(7) { animation-delay: 0.7s; }
+.grid-stagger > *:nth-child(8) { animation-delay: 0.8s; }
+
+/* Luxury brand page specific enhancements */
+
+/* Versace gold text shimmer on hover */
+.text-versace-gold {
+  color: #C6A75E;
+  transition: all 0.5s ease;
+}
+
+.text-versace-gold:hover {
+  text-shadow: 0 0 20px rgba(198, 167, 94, 0.4);
+}
+
+/* Subtle breathing glow for accent elements */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.3;
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 0.5;
+    filter: blur(1px);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Elegant text reveal */
+@keyframes textRevealUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-text-reveal {
+  animation: textRevealUp 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* Marquee animation for continuous scroll */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Elegant border glow on hover */
+.border-glow {
+  transition: box-shadow 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.border-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Luxury button press effect */
+.btn-luxury {
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.btn-luxury:active {
+  transform: scale(0.98);
+}
+
+/* Smooth image loading transition */
+.img-loading {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.img-loading.loaded {
+  opacity: 1;
+}
+
+/* Refined focus ring for luxury feel */
+.focus-luxury:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+  opacity: 0.8;
+}
+
+/* Card shine effect on hover */
+@keyframes cardShine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card-shine:hover::after {
+  opacity: 1;
+  animation: cardShine 0.8s ease forwards;
 }

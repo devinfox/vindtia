@@ -184,7 +184,7 @@ export default async function AppHomePage() {
           {/* Headline - High contrast serif */}
           <h1 className="font-display text-6xl md:text-8xl lg:text-9xl tracking-tight leading-[0.85] mb-8 max-w-5xl">
             <span className="block text-[#2C2420]">Exclusive</span>
-            <span className="block text-[#722F37] italic font-normal">Capsules</span>
+            <span className="block text-[#62130e] italic font-normal">Capsules</span>
             <span className="block text-[#2C2420]/60 text-4xl md:text-5xl lg:text-6xl mt-4 font-editorial font-light">Now Available</span>
           </h1>
 
@@ -198,10 +198,10 @@ export default async function AppHomePage() {
             href="/curations"
             className="group inline-flex items-center gap-6"
           >
-            <span className="font-editorial text-lg tracking-[0.15em] uppercase text-[#722F37] border-b-2 border-[#B8A06A]/40 pb-2 group-hover:border-[#722F37] transition-all duration-700">
+            <span className="font-editorial text-lg tracking-[0.15em] uppercase text-[#62130e] border-b-2 border-[#B8A06A]/40 pb-2 group-hover:border-[#62130e] transition-all duration-700">
               Explore This Week's Curation
             </span>
-            <span className="text-[#722F37] text-2xl group-hover:translate-x-3 transition-transform duration-700">→</span>
+            <span className="text-[#62130e] text-2xl group-hover:translate-x-3 transition-transform duration-700">→</span>
           </Link>
         </div>
 
@@ -231,7 +231,7 @@ export default async function AppHomePage() {
             Curated Selections
           </p>
           <h2 className="font-display text-5xl md:text-6xl lg:text-7xl tracking-tight text-[#2C2420] leading-[0.9] mb-6">
-            This Week's <span className="italic text-[#722F37]">Curations</span>
+            This Week's <span className="italic text-[#62130e]">Curations</span>
           </h2>
           <div className="w-24 h-px bg-gradient-to-r from-[#B8A06A] to-transparent mt-8" />
         </div>
@@ -332,12 +332,12 @@ export default async function AppHomePage() {
               The Masters
             </p>
             <h2 className="font-display text-5xl md:text-6xl lg:text-7xl tracking-tight text-[#2C2420] leading-[0.9]">
-              Featured <span className="italic text-[#722F37]">Designers</span>
+              Featured <span className="italic text-[#62130e]">Designers</span>
             </h2>
           </div>
           <Link
             href="/designers"
-            className="font-editorial text-sm tracking-[0.2em] uppercase text-[#722F37] hover:text-[#5C252D] transition-colors duration-500 flex items-center gap-2"
+            className="font-editorial text-sm tracking-[0.2em] uppercase text-[#62130e] hover:text-[#4a0f0b] transition-colors duration-500 flex items-center gap-2"
           >
             View All Designers <span>→</span>
           </Link>
@@ -362,19 +362,19 @@ export default async function AppHomePage() {
                 {/* Warm vignette */}
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(61,46,38,0.2)_100%)]" />
                 {/* Hover overlay */}
-                <div className="absolute inset-0 bg-[#722F37]/0 group-hover:bg-[#722F37]/10 transition-colors duration-700" />
+                <div className="absolute inset-0 bg-[#62130e]/0 group-hover:bg-[#62130e]/10 transition-colors duration-700" />
                 {/* Gold border accent */}
                 <div className="absolute inset-0 border border-[#B8A06A]/0 group-hover:border-[#B8A06A]/40 transition-colors duration-700" />
               </div>
 
               {/* Info */}
-              <h3 className="font-display text-xl md:text-2xl text-[#2C2420] mb-2 tracking-tight group-hover:text-[#722F37] transition-colors duration-500">
+              <h3 className="font-display text-xl md:text-2xl text-[#2C2420] mb-2 tracking-tight group-hover:text-[#62130e] transition-colors duration-500">
                 {designer.name}
               </h3>
               <p className="font-editorial text-sm text-[#2C2420]/50 italic mb-3">
                 {designer.origin}
               </p>
-              <span className="font-editorial text-xs tracking-[0.2em] uppercase text-[#B8A06A] group-hover:text-[#722F37] transition-colors duration-500">
+              <span className="font-editorial text-xs tracking-[0.2em] uppercase text-[#B8A06A] group-hover:text-[#62130e] transition-colors duration-500">
                 See Pieces →
               </span>
             </Link>
@@ -399,7 +399,7 @@ export default async function AppHomePage() {
           {/* Vignette */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(44,36,32,0.5)_100%)]" />
           {/* Side warmth */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#722F37]/20 via-transparent to-[#722F37]/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#62130e]/20 via-transparent to-[#62130e]/20" />
           {/* Film grain */}
           <div className="absolute inset-0 opacity-[0.08] mix-blend-overlay bg-[url('data:image/svg+xml,%3Csvg viewBox=%270%200%20200%20200%27%20xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter%20id=%27grain%27%3E%3CfeTurbulence%20baseFrequency=%270.65%27%20type=%27fractalNoise%27%20numOctaves=%273%27%20stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect%20width=%27100%25%27%20height=%27100%25%27%20filter=%27url(%23grain)%27/%3E%3C/svg%3E')]" />
         </div>
@@ -433,7 +433,7 @@ export default async function AppHomePage() {
           ) : (
             <Link
               href="/upgrade"
-              className="px-12 py-5 bg-[#722F37] border border-[#722F37] font-editorial text-sm tracking-[0.3em] uppercase text-[#FAF8F3] hover:bg-[#5C252D] transition-all duration-700"
+              className="px-12 py-5 bg-[#62130e] border border-[#62130e] font-editorial text-sm tracking-[0.3em] uppercase text-[#FAF8F3] hover:bg-[#4a0f0b] transition-all duration-700"
             >
               Upgrade for Access
             </Link>
@@ -464,7 +464,7 @@ export default async function AppHomePage() {
               <p className="font-editorial text-xs tracking-[0.3em] uppercase text-[#B8A06A] mb-4">
                 Current Tier
               </p>
-              <p className="font-display text-3xl text-[#722F37]">
+              <p className="font-display text-3xl text-[#62130e]">
                 {tierNames[membershipStatus.tier]}
               </p>
             </div>
@@ -501,12 +501,12 @@ export default async function AppHomePage() {
             {membershipStatus.tier < 3 && (
               <Link
                 href="/upgrade"
-                className="card-archival p-8 flex flex-col justify-center items-center hover:border-[#722F37]/40 transition-all duration-500 group"
+                className="card-archival p-8 flex flex-col justify-center items-center hover:border-[#62130e]/40 transition-all duration-500 group"
               >
-                <p className="font-editorial text-xs tracking-[0.3em] uppercase text-[#B8A06A] group-hover:text-[#722F37] transition-colors duration-500 mb-2">
+                <p className="font-editorial text-xs tracking-[0.3em] uppercase text-[#B8A06A] group-hover:text-[#62130e] transition-colors duration-500 mb-2">
                   Elevate Your Access
                 </p>
-                <p className="font-display text-xl text-[#722F37] group-hover:text-[#5C252D] transition-colors duration-500">
+                <p className="font-display text-xl text-[#62130e] group-hover:text-[#4a0f0b] transition-colors duration-500">
                   Upgrade Tier →
                 </p>
               </Link>
@@ -525,7 +525,7 @@ export default async function AppHomePage() {
             From the Editorial Desk
           </p>
           <h2 className="font-display text-5xl md:text-6xl lg:text-7xl tracking-tight text-[#2C2420] leading-[0.9]">
-            Stories & <span className="italic text-[#722F37]">Lookbooks</span>
+            Stories & <span className="italic text-[#62130e]">Lookbooks</span>
           </h2>
           <div className="w-24 h-px bg-gradient-to-r from-[#B8A06A] to-transparent mt-8" />
         </div>
@@ -550,7 +550,7 @@ export default async function AppHomePage() {
                 />
                 {/* Warm vignette */}
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(61,46,38,0.15)_100%)]" />
-                <div className="absolute inset-0 bg-[#722F37]/0 group-hover:bg-[#722F37]/5 transition-colors duration-700" />
+                <div className="absolute inset-0 bg-[#62130e]/0 group-hover:bg-[#62130e]/5 transition-colors duration-700" />
               </div>
 
               {/* Content */}
@@ -559,13 +559,13 @@ export default async function AppHomePage() {
                   <p className="font-editorial text-xs tracking-[0.4em] uppercase text-[#B8A06A] mb-8">
                     Story {String(index + 1).padStart(2, "0")}
                   </p>
-                  <h3 className="font-display text-4xl md:text-5xl text-[#2C2420] mb-8 tracking-tight leading-[1.1] group-hover:text-[#722F37] transition-colors duration-700">
+                  <h3 className="font-display text-4xl md:text-5xl text-[#2C2420] mb-8 tracking-tight leading-[1.1] group-hover:text-[#62130e] transition-colors duration-700">
                     {story.title}
                   </h3>
                   <p className="font-editorial text-lg md:text-xl text-[#2C2420]/60 font-light leading-relaxed mb-10">
                     {story.excerpt}
                   </p>
-                  <span className="font-editorial text-sm tracking-[0.2em] uppercase text-[#722F37] group-hover:text-[#5C252D] transition-colors duration-500 flex items-center gap-4">
+                  <span className="font-editorial text-sm tracking-[0.2em] uppercase text-[#62130e] group-hover:text-[#4a0f0b] transition-colors duration-500 flex items-center gap-4">
                     Read Story
                     <span className="group-hover:translate-x-3 transition-transform duration-700">→</span>
                   </span>

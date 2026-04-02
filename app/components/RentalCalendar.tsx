@@ -12,6 +12,7 @@ type RentalCalendarProps = {
   bookedDates: { start_date: string; end_date: string }[];
   canRent: boolean;
   rentalsRemaining: number | null;
+  rentalWindowDays?: number;
 };
 
 export default function RentalCalendar({
@@ -23,6 +24,7 @@ export default function RentalCalendar({
   bookedDates,
   canRent,
   rentalsRemaining,
+  rentalWindowDays = 14,
 }: RentalCalendarProps) {
   const router = useRouter();
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -190,8 +192,8 @@ export default function RentalCalendar({
       {rentalsRemaining !== null && (
         <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
           {rentalsRemaining === 0
-            ? "You've reached your monthly rental limit."
-            : `${rentalsRemaining} rental${rentalsRemaining !== 1 ? "s" : ""} remaining this month`}
+            ? `You've reached your rental limit for this ${rentalWindowDays}-day period.`
+            : `${rentalsRemaining} rental${rentalsRemaining !== 1 ? "s" : ""} remaining (resets every ${rentalWindowDays} days)`}
         </p>
       )}
 
@@ -330,7 +332,7 @@ export default function RentalCalendar({
           ? rentalsRemaining === 0
             ? "Rental limit reached"
             : "Upgrade to rent"
-          : "Continue to Checkout"}
+          : "Reserve This Piece"}
       </button>
     </div>
   );

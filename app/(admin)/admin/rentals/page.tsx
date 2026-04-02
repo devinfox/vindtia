@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 import RentalStatusManager from "@/components/admin/RentalStatusManager";
 
 type Rental = {
@@ -39,29 +38,46 @@ export default async function AdminRentalsPage() {
 
   const rentals = rentalsData as Rental[] | null;
 
-  const statusColors: Record<string, string> = {
-    pending: "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400",
-    confirmed: "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400",
-    shipped: "bg-indigo-100 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-400",
-    delivered: "bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-400",
-    active: "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400",
-    return_initiated: "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-400",
-    return_shipped: "bg-pink-100 dark:bg-pink-900/20 text-pink-800 dark:text-pink-400",
-    returned: "bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-400",
-    completed: "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400",
-    cancelled: "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400",
+  const statusStyles: Record<string, string> = {
+    pending:
+      "bg-[var(--gold)]/10 text-[var(--gold)] border border-[var(--gold)]/20",
+    confirmed:
+      "bg-blue-500/10 text-blue-400 border border-blue-400/20",
+    shipped:
+      "bg-indigo-500/10 text-indigo-400 border border-indigo-400/20",
+    delivered:
+      "bg-purple-500/10 text-purple-400 border border-purple-400/20",
+    active:
+      "bg-[var(--olive)]/10 text-[var(--olive)] border border-[var(--olive)]/20",
+    return_initiated:
+      "bg-orange-500/10 text-orange-400 border border-orange-400/20",
+    return_shipped:
+      "bg-pink-500/10 text-pink-400 border border-pink-400/20",
+    returned:
+      "bg-teal-500/10 text-teal-400 border border-teal-400/20",
+    completed:
+      "bg-[var(--foreground)]/5 text-[var(--foreground)]/60 border border-[var(--foreground)]/10",
+    cancelled:
+      "bg-[#62130e]/10 text-[#62130e] border border-[#62130e]/20",
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">
+    <div className="p-8 lg:p-12 bg-[var(--background-warm)] min-h-full">
+      {/* Page Header */}
+      <div className="mb-10">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="w-8 h-[1px] bg-[#C4B99A]/40" />
+          <p className="text-[#C4B99A] text-[10px] tracking-[0.3em] uppercase">
+            Operations
+          </p>
+        </div>
+        <h1 className="font-display text-3xl lg:text-4xl text-[var(--foreground)] tracking-wide">
           Rentals & Returns
         </h1>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
         {[
           { label: "Pending", status: "pending" },
           { label: "Shipped", status: "shipped" },
@@ -72,12 +88,12 @@ export default async function AdminRentalsPage() {
         ].map(({ label, status }) => (
           <div
             key={status}
-            className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg p-4"
+            className="bg-[var(--background)] border border-[var(--gold)]/10 p-5 hover:border-[var(--gold)]/30 transition-all duration-500"
           >
-            <p className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+            <p className="text-[var(--gold)] text-[10px] tracking-[0.2em] uppercase mb-2">
               {label}
             </p>
-            <p className="text-2xl font-bold text-black dark:text-white">
+            <p className="font-display text-3xl text-[var(--foreground)]">
               {rentals?.filter((r) => r.status === status).length || 0}
             </p>
           </div>
@@ -85,89 +101,99 @@ export default async function AdminRentalsPage() {
       </div>
 
       {rentals && rentals.length > 0 ? (
-        <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+        <div className="bg-[var(--background)] border border-[var(--gold)]/10 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-zinc-50 dark:bg-zinc-900">
+              <thead className="bg-[var(--background-warm)] border-b border-[var(--gold)]/10">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Rental ID
+                  <th className="px-4 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
+                    ID
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  <th className="px-4 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                     Customer
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  <th className="px-4 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                     Product
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  <th className="px-4 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                     Dates
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  <th className="px-4 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                     Status
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  <th className="px-4 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                     Tracking
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  <th className="px-4 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <tbody className="divide-y divide-[var(--gold)]/10">
                 {rentals.map((rental: any) => (
                   <tr
                     key={rental.id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                    className="hover:bg-[var(--gold)]/5 transition-colors duration-300"
                   >
-                    <td className="px-4 py-4 text-sm font-mono text-zinc-600 dark:text-zinc-400">
-                      {rental.id.slice(0, 8)}...
+                    <td className="px-4 py-4">
+                      <span className="font-mono text-xs text-[var(--foreground)]/50">
+                        {rental.id.slice(0, 8)}...
+                      </span>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="text-sm">
-                        <p className="font-medium text-black dark:text-white">
+                      <div>
+                        <p className="font-editorial text-[var(--foreground)] text-sm">
                           {rental.user?.name || "Unknown"}
                         </p>
-                        <p className="text-zinc-600 dark:text-zinc-400 text-xs">
+                        <p className="text-xs text-[var(--foreground)]/50 italic">
                           {rental.user?.email || "N/A"}
                         </p>
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="text-sm">
-                        <p className="font-medium text-black dark:text-white">
+                      <div>
+                        <p className="font-editorial text-[var(--foreground)] text-sm">
                           {rental.product?.name || "N/A"}
                         </p>
-                        <p className="text-zinc-600 dark:text-zinc-400 text-xs">
+                        <p className="text-xs text-[var(--foreground)]/50 italic">
                           {rental.product?.designer?.name || "No designer"}
                         </p>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm text-zinc-600 dark:text-zinc-400">
-                      <p>{new Date(rental.start_date).toLocaleDateString()}</p>
-                      <p className="text-xs">
+                    <td className="px-4 py-4">
+                      <p className="font-editorial text-[var(--foreground)] text-sm">
+                        {new Date(rental.start_date).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-[var(--foreground)]/50">
                         to {new Date(rental.end_date).toLocaleDateString()}
                       </p>
                     </td>
                     <td className="px-4 py-4">
                       <span
-                        className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                          statusColors[rental.status] || statusColors.pending
+                        className={`font-button text-[9px] tracking-[0.1em] uppercase px-2 py-1 ${
+                          statusStyles[rental.status] || statusStyles.pending
                         }`}
                       >
                         {rental.status.replace(/_/g, " ")}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-xs">
+                    <td className="px-4 py-4">
                       {rental.tracking_number && (
-                        <p className="text-zinc-600 dark:text-zinc-400">
+                        <p className="text-xs text-[var(--foreground)]/50 font-mono">
                           Out: {rental.tracking_number}
                         </p>
                       )}
                       {rental.return_tracking_number && (
-                        <p className="text-zinc-600 dark:text-zinc-400">
-                          Return: {rental.return_tracking_number}
+                        <p className="text-xs text-[var(--foreground)]/50 font-mono">
+                          Ret: {rental.return_tracking_number}
                         </p>
                       )}
+                      {!rental.tracking_number &&
+                        !rental.return_tracking_number && (
+                          <span className="text-[var(--foreground)]/30 text-xs">
+                            —
+                          </span>
+                        )}
                     </td>
                     <td className="px-4 py-4">
                       <RentalStatusManager rental={rental} />
@@ -179,8 +205,10 @@ export default async function AdminRentalsPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg p-12 text-center">
-          <p className="text-zinc-600 dark:text-zinc-400">No rentals yet.</p>
+        <div className="bg-[var(--background)] border border-[var(--gold)]/10 p-12 text-center">
+          <p className="font-editorial text-[var(--foreground)]/60 italic">
+            No rentals yet.
+          </p>
         </div>
       )}
     </div>

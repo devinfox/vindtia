@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import ProductGallery from "@/components/ProductGallery";
 import RentalCalendar from "@/components/RentalCalendar";
+import Navbar from "@/components/Navbar";
+import ProductAccordion from "@/components/ProductAccordion";
 
 type Params = Promise<{ id: string }>;
 
@@ -17,7 +19,7 @@ export default async function ProductDetailPage(props: { params: Params }) {
   // Fetch user's membership tier and rental info
   let userTier = 0;
   let tierInfo = null;
-  let rentalsThisMonth = 0;
+  let rentalsInWindow = 0;
 
   if (user) {
     const { data: profile } = await supabase
@@ -35,20 +37,21 @@ export default async function ProductDetailPage(props: { params: Params }) {
       .single();
     tierInfo = tier;
 
-    // Count rentals this month
+    // Count rentals in the rolling window (default 14 days)
     if (userTier > 0) {
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
+      const windowDays = tierInfo?.rental_window_days || 14;
+      const windowStart = new Date();
+      windowStart.setDate(windowStart.getDate() - windowDays);
+      windowStart.setHours(0, 0, 0, 0);
 
       const { count } = await supabase
         .from("rentals")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
         .not("status", "in", '("cancelled","returned","completed")')
-        .gte("created_at", startOfMonth.toISOString());
+        .gte("created_at", windowStart.toISOString());
 
-      rentalsThisMonth = count || 0;
+      rentalsInWindow = count || 0;
     }
   }
 
@@ -95,177 +98,170 @@ export default async function ProductDetailPage(props: { params: Params }) {
     userTier >= product.tier_required &&
     inStock &&
     (tierInfo?.monthly_rental_limit === null ||
-      rentalsThisMonth < tierInfo?.monthly_rental_limit);
+      tierInfo?.monthly_rental_limit === 0 ||
+      rentalsInWindow < tierInfo?.monthly_rental_limit);
 
   const rentalsRemaining =
-    tierInfo?.monthly_rental_limit !== null
-      ? Math.max(0, (tierInfo?.monthly_rental_limit || 0) - rentalsThisMonth)
+    tierInfo?.monthly_rental_limit !== null && tierInfo?.monthly_rental_limit > 0
+      ? Math.max(0, (tierInfo?.monthly_rental_limit || 0) - rentalsInWindow)
       : null;
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-black">
-      {/* Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <Link href="/storefront">
-              <h1 className="text-3xl font-bold tracking-tight text-red-600 dark:text-red-500">
-                VINDTIA
-              </h1>
-            </Link>
-            <Link
-              href="/storefront"
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-            >
-              ← Back to Archive
-            </Link>
-          </div>
-        </div>
-      </header>
+  const rentalWindowDays = tierInfo?.rental_window_days || 14;
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+  return (
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Breadcrumb */}
+      <div className="bg-[var(--background-deep)] border-b border-[var(--gold)]/10 py-4">
+        <div className="max-w-7xl mx-auto px-6">
+          <Link
+            href="/storefront"
+            className="inline-flex items-center gap-2 text-sm text-[var(--foreground)]/60 hover:text-[var(--gold)] transition-colors font-editorial"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to The Archive
+          </Link>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Gallery */}
           <div>
             <ProductGallery media={sortedMedia} productName={product.name} />
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Tier Badge */}
             {product.tier_required > 0 && (
-              <div className="inline-block px-3 py-1 bg-black dark:bg-white text-white dark:text-black text-xs font-medium rounded">
-                Tier {product.tier_required} Required
+              <div className="inline-block px-4 py-2 bg-[var(--espresso)] border border-[var(--gold)]/20">
+                <span className="text-[var(--gold)] text-xs tracking-[0.2em] uppercase">
+                  Tier {product.tier_required} Required
+                </span>
               </div>
             )}
 
-            {/* Title & Designer */}
+            {/* Designer & Title */}
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-black dark:text-white mb-2">
-                {product.name}
-              </h1>
               {product.designer && (
-                <p className="text-xl text-zinc-600 dark:text-zinc-400">
+                <p className="text-[var(--gold)] text-sm tracking-[0.2em] uppercase mb-3">
                   {product.designer.name}
                 </p>
               )}
+              <h1 className="font-display text-3xl lg:text-4xl text-[var(--foreground)] tracking-wide">
+                {product.name}
+              </h1>
             </div>
 
             {/* Price */}
-            <div className="border-t border-b border-zinc-200 dark:border-zinc-800 py-4">
-              <p className="text-3xl font-bold text-black dark:text-white">
+            <div className="py-6 border-t border-b border-[var(--gold)]/20">
+              <p className="font-display text-3xl text-[var(--foreground)]">
                 ${product.price_per_rental.toFixed(0)}
-                <span className="text-lg font-normal text-zinc-600 dark:text-zinc-400">
-                  {" "}
-                  / rental
+                <span className="font-editorial text-lg text-[var(--foreground)]/50 ml-2">
+                  per rental
                 </span>
               </p>
             </div>
 
-            {/* Details */}
-            <div className="space-y-3">
+            {/* Details Grid */}
+            <div className="grid grid-cols-2 gap-4">
               {product.era && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <div className="p-4 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                  <span className="block text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 mb-1">
                     Era
                   </span>
-                  <span className="text-sm font-medium text-black dark:text-white">
+                  <span className="font-editorial text-[var(--foreground)]">
                     {product.era}
                   </span>
                 </div>
               )}
               {product.size && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <div className="p-4 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                  <span className="block text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 mb-1">
                     Size
                   </span>
-                  <span className="text-sm font-medium text-black dark:text-white">
+                  <span className="font-editorial text-[var(--foreground)]">
                     {product.size}
                   </span>
                 </div>
               )}
               {product.color && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <div className="p-4 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                  <span className="block text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 mb-1">
                     Color
                   </span>
-                  <span className="text-sm font-medium text-black dark:text-white">
+                  <span className="font-editorial text-[var(--foreground)]">
                     {product.color}
                   </span>
                 </div>
               )}
               {product.material && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <div className="p-4 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                  <span className="block text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 mb-1">
                     Material
                   </span>
-                  <span className="text-sm font-medium text-black dark:text-white">
+                  <span className="font-editorial text-[var(--foreground)]">
                     {product.material}
                   </span>
                 </div>
               )}
               {product.category && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <div className="p-4 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                  <span className="block text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 mb-1">
                     Category
                   </span>
-                  <span className="text-sm font-medium text-black dark:text-white">
+                  <span className="font-editorial text-[var(--foreground)]">
                     {product.category}
                   </span>
                 </div>
               )}
               {product.condition && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <div className="p-4 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                  <span className="block text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 mb-1">
                     Condition
                   </span>
-                  <span className="text-sm font-medium text-black dark:text-white">
+                  <span className="font-editorial text-[var(--foreground)]">
                     {product.condition}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="p-4 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                <span className="block text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 mb-1">
                   Availability
                 </span>
-                <span
-                  className={`text-sm font-medium ${
-                    inStock
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
+                <span className={`font-editorial ${
+                  inStock ? "text-[var(--olive)]" : "text-[#62130e]"
+                }`}>
                   {inStock ? "In Stock" : "Out of Stock"}
                 </span>
               </div>
             </div>
 
-            {/* Description */}
+            {/* Description Accordion */}
             {product.description && (
-              <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
-                <h3 className="text-sm font-medium text-black dark:text-white mb-2 uppercase tracking-wider">
-                  Description
-                </h3>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line">
+              <ProductAccordion title="About This Piece" defaultOpen={false}>
+                <p className="font-editorial text-[var(--foreground)]/80 leading-relaxed whitespace-pre-line">
                   {product.description}
                 </p>
-              </div>
+              </ProductAccordion>
             )}
 
-            {/* Designer Info */}
+            {/* Designer Info Accordion */}
             {product.designer?.bio && (
-              <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
-                <h3 className="text-sm font-medium text-black dark:text-white mb-2 uppercase tracking-wider">
-                  About {product.designer.name}
-                </h3>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300">
+              <ProductAccordion title={`About ${product.designer.name}`} defaultOpen={false}>
+                <p className="font-editorial text-[var(--foreground)]/80 leading-relaxed">
                   {product.designer.bio}
                 </p>
-              </div>
+              </ProductAccordion>
             )}
 
             {/* Rental Calendar or CTA */}
-            <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="pt-6 border-t border-[var(--gold)]/10">
               {user ? (
                 userTier > 0 ? (
                   userTier >= product.tier_required ? (
@@ -279,58 +275,74 @@ export default async function ProductDetailPage(props: { params: Params }) {
                         bookedDates={bookedRentals || []}
                         canRent={canRent}
                         rentalsRemaining={rentalsRemaining}
+                        rentalWindowDays={rentalWindowDays}
                       />
                     ) : (
-                      <div className="text-center py-8">
-                        <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+                      <div className="text-center py-10 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                        <p className="font-editorial text-[var(--foreground)]/60 mb-6">
                           This item is currently out of stock.
                         </p>
                         <button
                           disabled
-                          className="w-full px-6 py-4 rounded-md bg-zinc-300 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-500 font-medium cursor-not-allowed"
+                          className="w-full px-8 py-4 bg-[var(--foreground)]/20 text-[var(--foreground)]/40 text-xs tracking-[0.2em] uppercase cursor-not-allowed"
                         >
                           Out of Stock
                         </button>
                       </div>
                     )
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+                    <div className="text-center py-10 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                      <p className="font-editorial text-[var(--foreground)]/60 mb-6">
                         This piece requires Tier {product.tier_required} membership.
                       </p>
                       <Link
                         href="/upgrade"
-                        className="inline-block w-full px-6 py-4 rounded-md bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-center"
+                        className="inline-block w-full px-8 py-4 bg-[#62130e] text-[#F5F0E8] text-xs tracking-[0.2em] uppercase hover:bg-[#4a0f0b] transition-luxury text-center"
                       >
                         Upgrade to Tier {product.tier_required}
                       </Link>
                     </div>
                   )
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+                  <div className="text-center py-10 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                    <p className="font-editorial text-[var(--foreground)]/60 mb-6">
                       You need a membership to rent this piece.
                     </p>
                     <Link
                       href="/upgrade"
-                      className="inline-block w-full px-6 py-4 rounded-md bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-center"
+                      className="inline-block w-full px-8 py-4 bg-[#62130e] text-[#F5F0E8] text-xs tracking-[0.2em] uppercase hover:bg-[#4a0f0b] transition-luxury text-center"
                     >
                       View Membership Options
                     </Link>
                   </div>
                 )
               ) : (
-                <Link
-                  href="/auth/signup"
-                  className="block w-full px-6 py-4 rounded-md bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-center"
-                >
-                  Sign up to rent
-                </Link>
+                <div className="text-center py-10 bg-[var(--background-warm)] border border-[var(--gold)]/10">
+                  <p className="font-editorial text-[var(--foreground)]/60 mb-6">
+                    Sign up to rent this archive piece.
+                  </p>
+                  <Link
+                    href="/signup"
+                    className="inline-block w-full px-8 py-4 bg-[#62130e] text-[#F5F0E8] text-xs tracking-[0.2em] uppercase hover:bg-[#4a0f0b] transition-luxury text-center"
+                  >
+                    Apply for Membership
+                  </Link>
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="py-12 text-[#F5F0E8]/60 mt-16" style={{ backgroundImage: "url('/vindtia-textured-background.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="font-editorial text-sm tracking-wider">
+            Archive Couture, Reimagined
+          </p>
+          <div className="rule-gold w-16 mx-auto mt-6" />
+        </div>
+      </footer>
     </div>
   );
 }

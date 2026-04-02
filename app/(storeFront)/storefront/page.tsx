@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import ProductGrid from "@/components/ProductGrid";
 import ProductFilters from "@/components/ProductFilters";
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense } from "react";
+import Navbar from "@/components/Navbar";
 
 type SearchParams = Promise<{
   designer?: string;
@@ -105,114 +107,143 @@ export default async function StorefrontPage({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
-      {/* Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <Link href="/">
-              <h1 className="text-3xl font-bold tracking-tight text-red-600 dark:text-red-500">
-                VINDTIA
-              </h1>
-            </Link>
-            <nav className="flex items-center gap-6">
-              {user ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/membership"
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-                  >
-                    Membership
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/auth/login"
-                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/auth/signup"
-                    className="px-4 py-2 rounded-md bg-black dark:bg-white text-white dark:text-black text-sm font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </nav>
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* Navbar */}
+      <Navbar transparent={true} sticky={true} />
+
+      {/* Hero Banner */}
+      <section className="relative pt-24 pb-12 lg:pt-28 lg:pb-14 overflow-hidden">
+        {/* Background Image */}
+        <Image
+          src="/vindtia-textured-background.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover"
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/40" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
+          <p className="text-[var(--gold)] text-xs tracking-[0.35em] uppercase mb-4">
+            Curated Collection
+          </p>
+          <h1 className="text-3xl lg:text-4xl xl:text-5xl text-[#F5F0E8] mb-4 tracking-[0.35em] uppercase">
+            The Archive
+          </h1>
+          <p className="font-editorial text-lg text-[#F5F0E8]/70 italic max-w-xl mx-auto">
+            Rare vintage couture, <span className="text-[var(--gold)]">authenticated</span> and ready to wear.
+          </p>
+        </div>
+      </section>
+
+      {/* Filters Section - Horizontal under banner */}
+      <section className="py-8 lg:py-10 bg-[var(--background-warm)] border-b border-[var(--gold)]/10">
+        <div className="w-full px-[5%] lg:px-[10%]">
+          <Suspense fallback={
+            <div className="flex items-center justify-center gap-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="w-16 h-16 bg-[var(--background-deep)] mb-3" />
+                  <div className="w-12 h-3 bg-[var(--background-deep)] mx-auto" />
+                </div>
+              ))}
+            </div>
+          }>
+            <ProductFilters filterOptions={filterOptions} userTier={userTier} />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* Membership Status Bar */}
+      <div className="bg-[var(--background-deep)] border-b border-[var(--gold)]/10 py-3">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="font-editorial text-[var(--foreground)]/70 text-sm">
+              {user
+                ? <>Membership Tier: <span className="text-[#62130e] font-medium">{userTier}</span> &mdash; Showing pieces available at your level</>
+                : "Browsing as guest — Sign up to unlock exclusive pieces"}
+            </p>
+            {!user && (
+              <Link
+                href="/signup"
+                className="font-button text-xs tracking-[0.15em] uppercase text-[var(--gold)] hover:text-[#62130e] transition-colors flex items-center gap-2"
+              >
+                Apply for Membership
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            )}
           </div>
         </div>
-      </header>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Tier Info */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold tracking-tight text-black dark:text-white mb-2">
-            The Archive
-          </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {user
-              ? `Current tier: ${userTier} • Showing pieces available at your level`
-              : "Browsing as guest • Sign up to unlock exclusive pieces"}
-          </p>
-          {!user && (
-            <Link
-              href="/auth/signup"
-              className="inline-block mt-2 text-sm text-red-600 dark:text-red-500 hover:underline"
-            >
-              Create an account to see more →
-            </Link>
-          )}
-        </div>
-
-        {/* Main Content with Sidebar */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <aside className="lg:w-64 flex-shrink-0">
-            <div className="lg:sticky lg:top-8">
-              <Suspense fallback={<div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 h-96 rounded-lg" />}>
-                <ProductFilters filterOptions={filterOptions} />
-              </Suspense>
-            </div>
-          </aside>
-
-          {/* Products Grid */}
-          <main className="flex-1">
-            {products && products.length > 0 ? (
-              <>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
-                  {products.length} piece{products.length !== 1 ? "s" : ""} found
+      {/* Main Content - Products Grid */}
+      <section className="py-12 lg:py-16 bg-[var(--background-warm)] texture-paper">
+        <div className="max-w-7xl mx-auto px-6">
+          {products && products.length > 0 ? (
+            <>
+              <div className="flex items-center justify-between mb-10">
+                <p className="font-editorial text-[var(--foreground)]/60 text-sm italic">
+                  {products.length} piece{products.length !== 1 ? "s" : ""} in the collection
                 </p>
-                <ProductGrid products={products} />
-              </>
-            ) : (
-              <div className="text-center py-16">
-                <p className="text-zinc-600 dark:text-zinc-400">
+              </div>
+              <ProductGrid products={products} />
+            </>
+          ) : (
+            <div className="text-center py-24 bg-[var(--background)] border border-[var(--gold)]/10">
+              <div className="max-w-md mx-auto">
+                <p className="font-display text-2xl text-[var(--foreground)] mb-4">
                   {userTier === 0
-                    ? "No pieces available at your tier. Upgrade to unlock the archive."
-                    : "No pieces found. Try adjusting your filters."}
+                    ? "Unlock the Archive"
+                    : "No Pieces Found"}
+                </p>
+                <p className="font-editorial text-[var(--foreground)]/60 mb-8">
+                  {userTier === 0
+                    ? "Membership unlocks access to our curated collection of rare vintage couture."
+                    : "Try adjusting your filters to discover more pieces."}
                 </p>
                 {userTier === 0 && (
                   <Link
                     href="/upgrade"
-                    className="inline-block mt-4 px-6 py-3 rounded-md bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                    className="font-button inline-block px-10 py-4 border-2 border-[#62130e] text-[#62130e] text-xs tracking-[0.2em] uppercase hover:bg-[#62130e] hover:text-[#F5F0E8] transition-luxury"
                   >
                     View Membership Tiers
                   </Link>
                 )}
               </div>
-            )}
-          </main>
+            </div>
+          )}
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative py-10 text-[#F5F0E8]/60 overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/vindtia-textured-background.jpg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
+        {/* Refined dark overlay */}
+        <div className="absolute inset-0 bg-black/50" />
+        {/* Top decorative border */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)]/40 to-transparent" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
+          <span className="font-display text-2xl lg:text-3xl tracking-[0.3em] text-white block mb-4 drop-shadow-lg">
+            VINDTIA
+          </span>
+          <div className="w-12 h-px bg-gradient-to-r from-transparent via-[var(--gold)]/60 to-transparent mx-auto mb-4" />
+          <p className="font-editorial text-sm tracking-[0.1em] text-[#F5F0E8]/60 italic">
+            Archive Couture, Reimagined
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

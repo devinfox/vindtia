@@ -1,31 +1,42 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin, isDevBypassEnabled } from "@/lib/admin";
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
+  // Dev bypass - skip all auth checks
+  const devBypass = isDevBypassEnabled();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!devBypass) {
+    const supabase = await createClient();
 
-  if (!user) {
-    redirect("/auth/login?redirect=/admin");
-  }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const admin = await isAdmin();
+    if (!user) {
+      redirect("/login?redirect=/admin");
+    }
 
-  if (!admin) {
-    redirect("/");
+    const admin = await isAdmin();
+
+    if (!admin) {
+      redirect("/");
+    }
   }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      {/* Dev mode banner */}
+      {devBypass && (
+        <div className="bg-yellow-500 text-black text-center py-1 text-xs font-bold tracking-wider">
+          DEV MODE - Auth Bypassed
+        </div>
+      )}
       {/* Header */}
       <header className="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 py-4">

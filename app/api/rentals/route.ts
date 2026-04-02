@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     // Get tier limits
     const { data: tierInfo } = await supabase
       .from("membership_tiers")
-      .select("monthly_rental_limit, rental_duration_days")
+      .select("monthly_rental_limit, rental_duration_days, rental_window_days")
       .eq("id", profile.membership_tier)
       .single();
 
@@ -57,22 +57,23 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check monthly rental limit
-    if (tierInfo?.monthly_rental_limit) {
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
+    // Check rental limit (rolling 2-week window)
+    if (tierInfo?.monthly_rental_limit && tierInfo.monthly_rental_limit > 0) {
+      const windowDays = tierInfo.rental_window_days || 14;
+      const windowStart = new Date();
+      windowStart.setDate(windowStart.getDate() - windowDays);
+      windowStart.setHours(0, 0, 0, 0);
 
       const { count } = await supabase
         .from("rentals")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
         .not("status", "in", '("cancelled","returned","completed")')
-        .gte("created_at", startOfMonth.toISOString());
+        .gte("created_at", windowStart.toISOString());
 
       if (count !== null && count >= tierInfo.monthly_rental_limit) {
         return NextResponse.json(
-          { error: "Monthly rental limit reached" },
+          { error: `Rental limit reached. You can rent ${tierInfo.monthly_rental_limit} item${tierInfo.monthly_rental_limit > 1 ? 's' : ''} per ${windowDays} days.` },
           { status: 400 }
         );
       }

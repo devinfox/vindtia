@@ -1,6 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin";
 import { NextResponse } from "next/server";
+import { generateProductAIDescription } from "@/lib/ai/generate-description";
 
 type Params = Promise<{ id: string }>;
 
@@ -20,6 +21,7 @@ export async function PATCH(req: Request, props: { params: Params }) {
       condition,
       era,
       material,
+      style,
       archive,
       tier_required,
       quantity,
@@ -35,20 +37,24 @@ export async function PATCH(req: Request, props: { params: Params }) {
 
     const supabase = await createClient();
 
+    // Helper to convert empty strings to null
+    const nullIfEmpty = (val: string | null | undefined) => (val && val.trim() !== "") ? val : null;
+
     // Update product
     const { data: product, error: productError } = await supabase
       .from("products")
       .update({
         name,
-        designer_id: designer_id || null,
-        description,
+        designer_id: nullIfEmpty(designer_id),
+        description: nullIfEmpty(description),
         price_per_rental,
-        size,
-        color,
-        category,
-        condition,
-        era,
-        material,
+        size: nullIfEmpty(size),
+        color: nullIfEmpty(color),
+        category: nullIfEmpty(category),
+        condition: nullIfEmpty(condition),
+        era: nullIfEmpty(era),
+        material: nullIfEmpty(material),
+        style: style || 'unisex',
         archive: archive || false,
         tier_required: tier_required || 1,
         updated_at: new Date().toISOString(),
@@ -93,14 +99,40 @@ export async function PATCH(req: Request, props: { params: Params }) {
         }));
 
         await supabase.from("product_media").insert(mediaRecords);
+
+        // Regenerate AI description when images change
+        // Fetch designer name for better classification context
+        let designerName: string | undefined;
+        if (designer_id) {
+          const { data: designer } = await supabase
+            .from("designers")
+            .select("name")
+            .eq("id", designer_id)
+            .single();
+          designerName = designer?.name;
+        }
+
+        // Build metadata for better classification
+        const productMetadata = {
+          era: era || undefined,
+          designer: designerName,
+          category: category || undefined,
+          color: color || undefined,
+          material: material || undefined,
+        };
+
+        generateProductAIDescription(params.id, description, mediaUrls, productMetadata).catch((err) => {
+          console.error("Background AI description generation failed:", err);
+        });
       }
     }
 
     return NextResponse.json(product);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Product update error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to update product";
     return NextResponse.json(
-      { error: error.message || "Failed to update product" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
@@ -111,7 +143,8 @@ export async function DELETE(_req: Request, props: { params: Params }) {
     await requireAdmin();
     const params = await props.params;
 
-    const supabase = await createClient();
+    // Use admin client to bypass RLS for deletion
+    const supabase = createAdminClient();
 
     // Delete product (cascade will handle media and inventory)
     const { error } = await supabase

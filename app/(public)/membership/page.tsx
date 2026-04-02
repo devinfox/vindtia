@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { MembershipTier } from "@/lib/types/database";
+import Navbar from "@/components/Navbar";
 
 export default async function MembershipPage() {
   const supabase = await createClient();
@@ -26,60 +27,103 @@ export default async function MembershipPage() {
     .order("id", { ascending: true });
 
   const currentTier = tiers?.find((t: MembershipTier) => t.id === (profile?.membership_tier || 0));
-  const tierNames = ["Free", "Tier 1", "Tier 2", "Tier 3"];
+  const tierNames = ["Guest", "Connoisseur", "Collector", "Curator"];
+  const tierDescriptions = [
+    "Browse the archive",
+    "Access to select archive pieces",
+    "Priority access & exclusive pieces",
+    "Full archive access & concierge service"
+  ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
-      {/* Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <Link href="/">
-              <h1 className="text-3xl font-bold tracking-tight text-red-600 dark:text-red-500">
-                VINDTIA
-              </h1>
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-            >
-              ← Back to Dashboard
-            </Link>
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* Navbar */}
+      <Navbar transparent={true} sticky={true} />
+
+      {/* Hero Section */}
+      <section
+        className="relative pt-24 pb-16 lg:pt-28 lg:pb-20"
+        style={{
+          backgroundImage: "url('/vindtia-textured-background.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-[1px] bg-[#C4B99A]/50" />
+            <p className="text-[#C4B99A] text-xs tracking-[0.3em] uppercase">
+              Membership
+            </p>
           </div>
-        </div>
-      </header>
-
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Current Membership */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold tracking-tight text-black dark:text-white mb-6">
+          <h1 className="font-display text-3xl lg:text-4xl text-[#F5F0E8] mb-3 tracking-wide">
             Your Membership
-          </h2>
+          </h1>
+          <p className="font-editorial text-[#F5F0E8]/60 italic">
+            Manage your access to the archive
+          </p>
+        </div>
+      </section>
 
-          <div className="bg-gradient-to-br from-red-600 to-red-800 rounded-lg p-8 text-white">
-            <div className="flex items-start justify-between mb-6">
+      {/* Main Content */}
+      <section className="py-12 lg:py-16 bg-[var(--background-warm)] texture-paper">
+        <div className="max-w-5xl mx-auto px-6">
+          {/* Current Membership Card */}
+          <div
+            className="relative overflow-hidden mb-16 p-8 lg:p-12"
+            style={{
+              background: "linear-gradient(135deg, #62130e 0%, #4a0f0b 100%)",
+            }}
+          >
+            {/* Decorative corner accents */}
+            <div className="absolute top-4 left-4 w-16 h-16 pointer-events-none opacity-30">
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-[#C4B99A] to-transparent" />
+              <div className="absolute top-0 left-0 h-full w-[1px] bg-gradient-to-b from-[#C4B99A] to-transparent" />
+            </div>
+            <div className="absolute top-4 right-4 w-16 h-16 pointer-events-none opacity-30">
+              <div className="absolute top-0 right-0 w-full h-[1px] bg-gradient-to-l from-[#C4B99A] to-transparent" />
+              <div className="absolute top-0 right-0 h-full w-[1px] bg-gradient-to-b from-[#C4B99A] to-transparent" />
+            </div>
+            <div className="absolute bottom-4 left-4 w-16 h-16 pointer-events-none opacity-30">
+              <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-[#C4B99A] to-transparent" />
+              <div className="absolute bottom-0 left-0 h-full w-[1px] bg-gradient-to-t from-[#C4B99A] to-transparent" />
+            </div>
+            <div className="absolute bottom-4 right-4 w-16 h-16 pointer-events-none opacity-30">
+              <div className="absolute bottom-0 right-0 w-full h-[1px] bg-gradient-to-l from-[#C4B99A] to-transparent" />
+              <div className="absolute bottom-0 right-0 h-full w-[1px] bg-gradient-to-t from-[#C4B99A] to-transparent" />
+            </div>
+
+            <div className="flex flex-col lg:flex-row items-start justify-between gap-8 mb-8">
               <div>
-                <p className="text-sm opacity-90 mb-2">Current Plan</p>
-                <p className="text-4xl font-bold">
+                <p className="text-[#F5F0E8]/50 text-xs tracking-[0.3em] uppercase mb-3">
+                  Current Plan
+                </p>
+                <h2 className="font-display text-3xl lg:text-4xl text-[#F5F0E8] tracking-wide mb-2">
                   {tierNames[profile?.membership_tier || 0]}
+                </h2>
+                <p className="font-editorial text-[#F5F0E8]/70 italic">
+                  {tierDescriptions[profile?.membership_tier || 0]}
                 </p>
               </div>
               {(profile?.membership_tier || 0) > 0 && (
-                <div className="px-4 py-2 rounded-md bg-white/20 backdrop-blur-sm">
-                  <p className="text-sm font-medium">Active</p>
+                <div className="px-4 py-2 border border-[#C4B99A]/30 bg-[#C4B99A]/10">
+                  <p className="font-button text-[10px] tracking-[0.2em] uppercase text-[#C4B99A]">
+                    Active
+                  </p>
                 </div>
               )}
             </div>
 
             {currentTier?.features && Array.isArray(currentTier.features) && (
-              <div className="space-y-2 mb-6">
-                <p className="text-sm font-medium opacity-90 uppercase tracking-wider">
+              <div className="mb-8 pt-8 border-t border-[#F5F0E8]/10">
+                <p className="text-[#C4B99A] text-xs tracking-[0.2em] uppercase mb-4">
                   Your Benefits
                 </p>
-                <ul className="space-y-2">
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {currentTier.features.map((feature: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <span className="opacity-90">✓</span>
+                    <li key={idx} className="flex items-start gap-3 font-editorial text-sm text-[#F5F0E8]/80">
+                      <span className="text-[#C4B99A] mt-0.5">✦</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -87,11 +131,11 @@ export default async function MembershipPage() {
               </div>
             )}
 
-            <div className="flex gap-3 pt-4 border-t border-white/20">
+            <div className="flex flex-wrap gap-4 pt-8 border-t border-[#F5F0E8]/10">
               {(profile?.membership_tier || 0) < 3 && (
                 <Link
                   href="/upgrade"
-                  className="px-6 py-3 rounded-md bg-white text-red-600 font-medium hover:bg-zinc-100 transition-colors"
+                  className="font-button px-8 py-4 bg-[#F5F0E8] text-[#62130e] text-xs tracking-[0.2em] uppercase hover:bg-[#F5F0E8]/90 transition-all duration-500"
                 >
                   Upgrade Membership
                 </Link>
@@ -99,102 +143,161 @@ export default async function MembershipPage() {
               {(profile?.membership_tier || 0) > 0 && profile?.stripe_customer_id && (
                 <a
                   href={`/api/stripe/portal?customer_id=${profile.stripe_customer_id}`}
-                  className="px-6 py-3 rounded-md bg-white/10 backdrop-blur-sm text-white font-medium hover:bg-white/20 transition-colors"
+                  className="font-button px-8 py-4 border border-[#F5F0E8]/30 text-[#F5F0E8] text-xs tracking-[0.2em] uppercase hover:bg-[#F5F0E8]/10 hover:border-[#F5F0E8]/50 transition-all duration-500"
                 >
                   Manage Billing
                 </a>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Available Tiers */}
-        <div>
-          <h3 className="text-2xl font-bold tracking-tight text-black dark:text-white mb-6">
-            Available Membership Tiers
-          </h3>
+          {/* Available Tiers */}
+          <div className="mb-16">
+            <div className="flex items-center gap-4 mb-10">
+              <h3 className="font-display text-2xl text-[var(--foreground)] tracking-wide">
+                Available Tiers
+              </h3>
+              <div className="flex-1 h-[1px] bg-[var(--gold)]/20" />
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {tiers
-              ?.filter((t: MembershipTier) => t.id > 0)
-              .map((tier: MembershipTier) => {
-                const isCurrent = tier.id === (profile?.membership_tier || 0);
-                const isLower = tier.id < (profile?.membership_tier || 0);
-                const features = Array.isArray(tier.features) ? tier.features : [];
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {tiers
+                ?.filter((t: MembershipTier) => t.id > 0)
+                .map((tier: MembershipTier) => {
+                  const isCurrent = tier.id === (profile?.membership_tier || 0);
+                  const isLower = tier.id < (profile?.membership_tier || 0);
+                  const features = Array.isArray(tier.features) ? tier.features : [];
 
-                return (
-                  <div
-                    key={tier.id}
-                    className={`relative p-6 rounded-lg border-2 ${
-                      isCurrent
-                        ? "border-red-600 dark:border-red-500 bg-red-50 dark:bg-red-950/20"
-                        : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
-                    }`}
-                  >
-                    {isCurrent && (
-                      <div className="absolute -top-3 left-4 px-3 py-1 bg-red-600 dark:bg-red-500 text-white text-xs font-medium rounded-full">
-                        Current Plan
-                      </div>
-                    )}
+                  return (
+                    <div
+                      key={tier.id}
+                      className={`relative p-6 lg:p-8 transition-all duration-500 ${
+                        isCurrent
+                          ? "bg-[#62130e]/5 border-2 border-[#62130e]/30"
+                          : "bg-[var(--background)] border border-[var(--gold)]/10 hover:border-[var(--gold)]/30"
+                      }`}
+                    >
+                      {isCurrent && (
+                        <div className="absolute -top-3 left-6 px-3 py-1 bg-[#62130e] text-[#F5F0E8]">
+                          <p className="font-button text-[9px] tracking-[0.2em] uppercase">
+                            Current
+                          </p>
+                        </div>
+                      )}
 
-                    <h4 className="text-2xl font-bold text-black dark:text-white mb-4">
-                      {tier.name}
-                    </h4>
+                      <p className="text-[var(--gold)] text-[10px] tracking-[0.3em] uppercase mb-2">
+                        Tier {tier.id}
+                      </p>
+                      <h4 className="font-display text-xl lg:text-2xl text-[var(--foreground)] tracking-wide mb-4">
+                        {tier.name}
+                      </h4>
 
-                    {features.length > 0 && (
-                      <ul className="space-y-2 mb-6">
-                        {features.map((feature: string, idx: number) => (
-                          <li
-                            key={idx}
-                            className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300"
-                          >
-                            <span className="text-red-600 dark:text-red-500">✓</span>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                      {features.length > 0 && (
+                        <ul className="space-y-3 mb-6">
+                          {features.slice(0, 4).map((feature: string, idx: number) => (
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2 text-sm text-[var(--foreground)]/70 font-editorial"
+                            >
+                              <span className="text-[#62130e] mt-0.5">✦</span>
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                          {features.length > 4 && (
+                            <li className="text-xs text-[var(--foreground)]/40 italic pl-5">
+                              +{features.length - 4} more benefits
+                            </li>
+                          )}
+                        </ul>
+                      )}
 
-                    {!isCurrent && !isLower && (
-                      <Link
-                        href="/upgrade"
-                        className="block w-full px-4 py-3 text-center rounded-md bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-                      >
-                        Upgrade to {tier.name}
-                      </Link>
-                    )}
-                  </div>
-                );
-              })}
+                      {!isCurrent && !isLower && (
+                        <Link
+                          href="/upgrade"
+                          className="font-button block w-full px-4 py-3 text-center border border-[#62130e] text-[#62130e] text-xs tracking-[0.15em] uppercase hover:bg-[#62130e] hover:text-[#F5F0E8] transition-all duration-500"
+                        >
+                          Upgrade
+                        </Link>
+                      )}
+
+                      {isLower && (
+                        <p className="font-editorial text-xs text-[var(--foreground)]/40 italic text-center py-3">
+                          Included in your plan
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
           </div>
-        </div>
 
-        {/* Help Section */}
-        <div className="mt-12 p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
-          <h4 className="text-lg font-semibold text-black dark:text-white mb-3">
-            Need Help?
-          </h4>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-            Questions about your membership? Want to cancel or change plans?
-          </p>
-          <div className="flex gap-3">
-            <Link
-              href="/upgrade"
-              className="text-sm text-red-600 dark:text-red-500 hover:underline"
-            >
-              View All Plans
-            </Link>
-            {profile?.stripe_customer_id && (
-              <a
-                href={`/api/stripe/portal?customer_id=${profile.stripe_customer_id}`}
-                className="text-sm text-red-600 dark:text-red-500 hover:underline"
+          {/* Help Section */}
+          <div className="bg-[var(--background)] border border-[var(--gold)]/10 p-8 lg:p-10">
+            <div className="flex items-center gap-4 mb-6">
+              <h4 className="font-display text-xl text-[var(--foreground)] tracking-wide">
+                Need Assistance?
+              </h4>
+              <div className="flex-1 h-[1px] bg-[var(--gold)]/10" />
+            </div>
+            <p className="font-editorial text-[var(--foreground)]/60 mb-6 max-w-2xl">
+              Questions about your membership? Our concierge team is here to help with
+              plan changes, billing inquiries, or any other questions you may have.
+            </p>
+            <div className="flex flex-wrap gap-6">
+              <Link
+                href="/upgrade"
+                className="font-button text-xs tracking-[0.15em] uppercase text-[#62130e] hover:text-[#4a0f0b] transition-colors flex items-center gap-2"
               >
-                Manage Subscription
-              </a>
-            )}
+                View All Plans
+                <span>→</span>
+              </Link>
+              {profile?.stripe_customer_id && (
+                <a
+                  href={`/api/stripe/portal?customer_id=${profile.stripe_customer_id}`}
+                  className="font-button text-xs tracking-[0.15em] uppercase text-[#62130e] hover:text-[#4a0f0b] transition-colors flex items-center gap-2"
+                >
+                  Manage Subscription
+                  <span>→</span>
+                </a>
+              )}
+              <Link
+                href="/dashboard"
+                className="font-button text-xs tracking-[0.15em] uppercase text-[var(--foreground)]/50 hover:text-[var(--foreground)] transition-colors flex items-center gap-2"
+              >
+                Back to Dashboard
+                <span>→</span>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer
+        className="relative py-16 text-[#F5F0E8]/60 overflow-hidden"
+        style={{
+          backgroundImage: "url('/vindtia-textured-background.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="flex flex-col items-center gap-8">
+            <span className="font-display text-2xl lg:text-3xl tracking-[0.25em] text-white">
+              VINDTIA
+            </span>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-[1px] bg-gradient-to-r from-transparent to-[var(--gold)]/40" />
+              <div className="w-1 h-1 rounded-full bg-[var(--gold)]/50" />
+              <div className="w-12 h-[1px] bg-gradient-to-l from-transparent to-[var(--gold)]/40" />
+            </div>
+            <p className="font-editorial text-sm tracking-wider italic">
+              Archive Couture, Reimagined
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -20,73 +20,93 @@ export default async function OrdersPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white mb-8">
-        Orders
-      </h1>
+    <div className="p-8 lg:p-12 bg-[var(--background-warm)] min-h-full">
+      {/* Page Header */}
+      <div className="mb-10">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="w-8 h-[1px] bg-[#C4B99A]/40" />
+          <p className="text-[#C4B99A] text-[10px] tracking-[0.3em] uppercase">
+            Transactions
+          </p>
+        </div>
+        <h1 className="font-display text-3xl lg:text-4xl text-[var(--foreground)] tracking-wide">
+          Orders
+        </h1>
+      </div>
 
       {orders && orders.length > 0 ? (
-        <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+        <div className="bg-[var(--background)] border border-[var(--gold)]/10 overflow-hidden">
           <table className="w-full">
-            <thead className="bg-zinc-50 dark:bg-zinc-900">
+            <thead className="bg-[var(--background-warm)] border-b border-[var(--gold)]/10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                   Order ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                   Customer
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-[10px] font-button text-[var(--gold)] tracking-[0.2em] uppercase">
                   Date
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <tbody className="divide-y divide-[var(--gold)]/10">
               {orders.map((order: any) => (
-                <tr key={order.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900">
-                  <td className="px-6 py-4 text-sm font-mono text-zinc-600 dark:text-zinc-400">
-                    {order.id.slice(0, 8)}...
+                <tr
+                  key={order.id}
+                  className="hover:bg-[var(--gold)]/5 transition-colors duration-300"
+                >
+                  <td className="px-6 py-4">
+                    <span className="font-mono text-xs text-[var(--foreground)]/50">
+                      {order.id.slice(0, 8)}...
+                    </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm">
-                      <p className="font-medium text-black dark:text-white">
+                    <div>
+                      <p className="font-editorial text-[var(--foreground)] text-sm">
                         {order.user?.name || "Unknown"}
                       </p>
-                      <p className="text-zinc-600 dark:text-zinc-400">
+                      <p className="text-xs text-[var(--foreground)]/50 italic">
                         {order.user?.email || "N/A"}
                       </p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-black dark:text-white">
-                    {order.rental?.product?.name || "N/A"}
+                  <td className="px-6 py-4">
+                    <span className="font-editorial text-[var(--foreground)] text-sm">
+                      {order.rental?.product?.name || "N/A"}
+                    </span>
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-black dark:text-white">
-                    ${order.amount.toFixed(2)}
+                  <td className="px-6 py-4">
+                    <span className="font-editorial text-[var(--foreground)]">
+                      ${order.amount.toFixed(2)}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+                      className={`font-button text-[9px] tracking-[0.1em] uppercase px-2 py-1 ${
                         order.status === "completed"
-                          ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400"
+                          ? "bg-[var(--olive)]/10 text-[var(--olive)] border border-[var(--olive)]/20"
                           : order.status === "pending"
-                          ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400"
-                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-400"
+                          ? "bg-[var(--gold)]/10 text-[var(--gold)] border border-[var(--gold)]/20"
+                          : "bg-[var(--foreground)]/5 text-[var(--foreground)]/50 border border-[var(--foreground)]/10"
                       }`}
                     >
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
-                    {new Date(order.created_at).toLocaleDateString()}
+                  <td className="px-6 py-4">
+                    <span className="text-sm text-[var(--foreground)]/60">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -94,8 +114,10 @@ export default async function OrdersPage() {
           </table>
         </div>
       ) : (
-        <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg p-12 text-center">
-          <p className="text-zinc-600 dark:text-zinc-400">No orders yet.</p>
+        <div className="bg-[var(--background)] border border-[var(--gold)]/10 p-12 text-center">
+          <p className="font-editorial text-[var(--foreground)]/60 italic">
+            No orders yet.
+          </p>
         </div>
       )}
     </div>
