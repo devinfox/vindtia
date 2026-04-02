@@ -500,49 +500,129 @@ function ImageCell({
     [...localItems].sort((a, b) => a.sort_order - b.sort_order),
     [localItems]
   );
-  const featuredImage = sortedItems[0];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Reset index if it's out of bounds
+  useEffect(() => {
+    if (currentIndex > sortedItems.length) {
+      setCurrentIndex(Math.max(0, sortedItems.length));
+    }
+  }, [sortedItems.length, currentIndex]);
+
+  const isOnAddSlide = currentIndex === sortedItems.length;
+  const currentImage = sortedItems[currentIndex];
+  const totalSlides = sortedItems.length + 1; // +1 for the "add" slide
+
+  const goNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentIndex < sortedItems.length) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const goPrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
 
   return (
     <div className="relative">
-      {/* Compact view */}
-      <div
-        onClick={() => setIsExpanded(true)}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        className={`w-16 h-20 cursor-pointer border transition-colors flex items-center justify-center ${
-          isDragging
-            ? "border-[var(--gold)] bg-[var(--gold)]/10"
-            : "border-[var(--gold)]/20 hover:border-[var(--gold)]/40"
-        }`}
-      >
-        {featuredImage ? (
-          <div className="relative w-full h-full">
-            {featuredImage.isUploading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-[var(--background-deep)]">
-                <div className="w-4 h-4 border border-[var(--gold)]/30 border-t-[var(--gold)] rounded-full animate-spin" />
-              </div>
-            ) : (
-              <Image
-                src={featuredImage.url}
-                alt="Product"
-                fill
-                className="object-cover"
-              />
-            )}
-            {localItems.length > 1 && (
-              <div className="absolute bottom-0 right-0 px-1 bg-[var(--espresso)] text-[var(--gold)] text-[10px]">
-                +{localItems.length - 1}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-[var(--foreground)]/30 text-xs text-center p-1">
-            Drop
-            <br />
-            images
-          </div>
+      {/* Compact view with navigation */}
+      <div className="flex items-center gap-1">
+        {/* Previous button */}
+        {currentIndex > 0 && (
+          <button
+            onClick={goPrev}
+            className="w-4 h-20 flex items-center justify-center text-[var(--foreground)]/40 hover:text-[var(--gold)] hover:bg-[var(--gold)]/10 transition-colors"
+            title="Previous image"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
         )}
+        {currentIndex === 0 && <div className="w-4" />}
+
+        {/* Image display area */}
+        <div
+          onClick={() => !isOnAddSlide && sortedItems.length > 0 && setIsExpanded(true)}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`w-16 h-20 border transition-colors flex items-center justify-center relative ${
+            isDragging
+              ? "border-[var(--gold)] bg-[var(--gold)]/10"
+              : isOnAddSlide
+              ? "border-dashed border-[var(--gold)]/40 hover:border-[var(--gold)] cursor-pointer"
+              : "border-[var(--gold)]/20 hover:border-[var(--gold)]/40 cursor-pointer"
+          }`}
+        >
+          {isOnAddSlide ? (
+            // Add new image slide
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+              className="flex flex-col items-center justify-center text-[var(--foreground)]/40 hover:text-[var(--gold)] transition-colors w-full h-full"
+            >
+              <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-[8px] uppercase tracking-wide">Add</span>
+            </div>
+          ) : currentImage ? (
+            <div className="relative w-full h-full">
+              {currentImage.isUploading ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-[var(--background-deep)]">
+                  <div className="w-4 h-4 border border-[var(--gold)]/30 border-t-[var(--gold)] rounded-full animate-spin" />
+                </div>
+              ) : (
+                <Image
+                  src={currentImage.url}
+                  alt={`Image ${currentIndex + 1}`}
+                  fill
+                  className="object-cover"
+                />
+              )}
+              {/* Image counter */}
+              <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5 bg-black/60 text-white text-[9px] text-center">
+                {currentIndex + 1} / {sortedItems.length}
+              </div>
+            </div>
+          ) : (
+            // No images yet
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+              className="flex flex-col items-center justify-center text-[var(--foreground)]/30 text-xs text-center p-1 w-full h-full"
+            >
+              <svg className="w-4 h-4 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-[8px]">Drop</span>
+            </div>
+          )}
+        </div>
+
+        {/* Next button */}
+        {currentIndex < sortedItems.length && (
+          <button
+            onClick={goNext}
+            className="w-4 h-20 flex items-center justify-center text-[var(--foreground)]/40 hover:text-[var(--gold)] hover:bg-[var(--gold)]/10 transition-colors"
+            title={currentIndex === sortedItems.length - 1 ? "Add image" : "Next image"}
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+        {currentIndex >= sortedItems.length && <div className="w-4" />}
       </div>
 
       {/* Expanded view modal */}
