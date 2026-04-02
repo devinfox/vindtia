@@ -341,6 +341,7 @@ function ImageCell({
   const [isUploading, setIsUploading] = useState(false);
   const [pendingSync, setPendingSync] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
   const localItemsRef = useRef<MediaItem[]>(localItems);
 
   // Keep ref in sync
@@ -390,17 +391,30 @@ function ImageCell({
     }
   };
 
+  // Natural sort function for filenames (so "2.jpg" comes before "10.jpg")
+  const naturalSort = (a: File, b: File) => {
+    // Use webkitRelativePath if available (folder upload), otherwise use name
+    const aPath = (a as any).webkitRelativePath || a.name;
+    const bPath = (b as any).webkitRelativePath || b.name;
+
+    return aPath.localeCompare(bPath, undefined, { numeric: true, sensitivity: 'base' });
+  };
+
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
 
+    // Convert FileList to array and filter for images
+    const fileArray = Array.from(files)
+      .filter(file => file.type.startsWith("image/"))
+      .sort(naturalSort);
+
     const newItems: MediaItem[] = [];
     const startOrder = localItems.length;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (!file.type.startsWith("image/")) continue;
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
 
       const tempUrl = URL.createObjectURL(file);
       newItems.push({
@@ -651,11 +665,10 @@ function ImageCell({
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed p-4 text-center cursor-pointer transition-colors mb-4 ${
+              className={`border-2 border-dashed p-4 text-center transition-colors mb-4 ${
                 isDragging
                   ? "border-[var(--gold)] bg-[var(--gold)]/10"
-                  : "border-[var(--gold)]/30 hover:border-[var(--gold)]/50"
+                  : "border-[var(--gold)]/30"
               }`}
             >
               <input
@@ -663,11 +676,45 @@ function ImageCell({
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(e) => handleFileSelect(e.target.files)}
+                onChange={(e) => {
+                  handleFileSelect(e.target.files);
+                  e.target.value = ''; // Reset so same file can be selected again
+                }}
                 className="hidden"
               />
-              <p className="text-sm text-[var(--foreground)]/60">
-                Drop images here or click to browse
+              <input
+                ref={folderInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                {...{ webkitdirectory: "", directory: "" } as any}
+                onChange={(e) => {
+                  handleFileSelect(e.target.files);
+                  e.target.value = ''; // Reset
+                }}
+                className="hidden"
+              />
+              <p className="text-sm text-[var(--foreground)]/60 mb-3">
+                Drop images here, or:
+              </p>
+              <div className="flex gap-2 justify-center">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 text-xs border border-[var(--gold)]/30 text-[var(--foreground)]/70 hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors"
+                >
+                  Select Files
+                </button>
+                <button
+                  type="button"
+                  onClick={() => folderInputRef.current?.click()}
+                  className="px-3 py-1.5 text-xs border border-[var(--gold)]/30 text-[var(--foreground)]/70 hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors"
+                >
+                  Select Folder
+                </button>
+              </div>
+              <p className="text-[10px] text-[var(--foreground)]/40 mt-2">
+                Folder uploads maintain filename order (1.jpg, 2.jpg, 10.jpg...)
               </p>
             </div>
 
