@@ -17,6 +17,7 @@ type MediaItem = {
 type Product = {
   id: string;
   name: string;
+  sku: string | null;
   designer_id: string | null;
   description: string | null;
   ai_description: string | null;
@@ -960,6 +961,11 @@ function CSVUploadModal({
         if (!value) return;
 
         switch (header) {
+          case "sku":
+          case "product sku":
+          case "item sku":
+            product.sku = value;
+            break;
           case "name":
           case "product name":
           case "title":
@@ -979,6 +985,9 @@ function CSVUploadModal({
           case "price":
           case "price_per_rental":
           case "rental price":
+          case "per week price ($)":
+          case "per week price":
+          case "weekly price":
             product.price_per_rental = parseFloat(value) || 0;
             break;
           case "description":
@@ -989,9 +998,11 @@ function CSVUploadModal({
             product.size = value;
             break;
           case "color":
+          case "colour":
             product.color = value.toLowerCase();
             break;
           case "category":
+          case "type":
             product.category = value.toLowerCase();
             break;
           case "condition":
@@ -1015,9 +1026,30 @@ function CSVUploadModal({
         }
       });
 
+      // If no name but we have description, use description as name
+      if (!product.name && product.description) {
+        product.name = product.description.substring(0, 100);
+      }
+      // If still no name but we have SKU, use SKU as name
+      if (!product.name && product.sku) {
+        product.name = product.sku;
+      }
+
+      // Auto-detect style from SKU prefix if not explicitly set
+      // F = feminine, M = masculine
+      if (!product.style && product.sku) {
+        const skuPrefix = product.sku.charAt(0).toUpperCase();
+        if (skuPrefix === "F") {
+          product.style = "feminine";
+        } else if (skuPrefix === "M") {
+          product.style = "masculine";
+        }
+      }
+
       if (product.name) {
         products.push({
           ...product,
+          sku: product.sku || null,
           price_per_rental: product.price_per_rental || 0,
           style: product.style || "unisex",
           tier_required: product.tier_required || 1,

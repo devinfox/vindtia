@@ -12,6 +12,7 @@ export async function PATCH(req: Request, props: { params: Params }) {
 
     const {
       name,
+      sku,
       designer_id,
       description,
       price_per_rental,
@@ -45,6 +46,7 @@ export async function PATCH(req: Request, props: { params: Params }) {
       .from("products")
       .update({
         name,
+        sku: nullIfEmpty(sku),
         designer_id: nullIfEmpty(designer_id),
         description: nullIfEmpty(description),
         price_per_rental,

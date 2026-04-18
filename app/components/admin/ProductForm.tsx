@@ -10,6 +10,7 @@ type ProductStyle = 'masculine' | 'feminine' | 'unisex';
 type Product = {
   id: string;
   name: string;
+  sku: string | null;
   designer_id: string | null;
   description: string | null;
   ai_description: string | null;
@@ -131,6 +132,7 @@ export default function ProductForm({ product, designers }: ProductFormProps) {
 
   const [formData, setFormData] = useState({
     name: product?.name || "",
+    sku: product?.sku || "",
     designer_id: product?.designer_id || "",
     description: product?.description || "",
     price_per_rental: product?.price_per_rental || 0,
@@ -312,7 +314,7 @@ export default function ProductForm({ product, designers }: ProductFormProps) {
           <div className="flex-1 h-px bg-[var(--gold)]/20" />
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className={labelStyles}>
               Product Name <span className="text-[var(--wine)]">*</span>
@@ -325,6 +327,18 @@ export default function ProductForm({ product, designers }: ProductFormProps) {
               disabled={loading}
               className={inputStyles}
               placeholder="e.g., Vintage Silk Evening Gown"
+            />
+          </div>
+
+          <div>
+            <label className={labelStyles}>SKU</label>
+            <input
+              type="text"
+              value={formData.sku}
+              onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+              disabled={loading}
+              className={inputStyles}
+              placeholder="e.g., FCHNL6BLK-FR36"
             />
           </div>
 

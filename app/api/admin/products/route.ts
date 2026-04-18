@@ -9,6 +9,7 @@ export async function POST(req: Request) {
 
     const {
       name,
+      sku,
       designer_id,
       description,
       price_per_rental,
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
       .insert([
         {
           name,
+          sku: nullIfEmpty(sku),
           designer_id: nullIfEmpty(designer_id),
           description: nullIfEmpty(description),
           price_per_rental,

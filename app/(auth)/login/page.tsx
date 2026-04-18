@@ -22,7 +22,7 @@ function LoginForm() {
 
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -31,6 +31,21 @@ function LoginForm() {
       setError(error.message);
       setLoading(false);
       return;
+    }
+
+    // Check if user needs to change password
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("must_change_password")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profile?.must_change_password) {
+        router.push("/change-password");
+        router.refresh();
+        return;
+      }
     }
 
     router.push(redirect);
